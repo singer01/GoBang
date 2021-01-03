@@ -32,7 +32,6 @@ public:
 extern CGoBangApp theApp;
 
 int GetChessBoardColor(int nx, int ny);
-int GetChessCount(int nx, int ny, CPoint*, CPoint*);
+int GetChessCount(int nx, int ny);
 int GetWinner();//获取赢家，-1无,0白,1黑
-int GetResult(int nx, int ny);
 extern int ChessBoard[SIZE][SIZE];//棋盘，-1为空，0为白，1为黑

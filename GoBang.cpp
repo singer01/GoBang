@@ -104,7 +104,7 @@ int GetChessBoardColor(int nx, int ny)
 	int color = ChessBoard[ny][nx];
 	return color;
 }
-int GetChessCount(int nx, int ny, CPoint* begin = NULL, CPoint* end = NULL)//获取指定棋子各个方向的同色棋子个数最大值
+int GetChessCount(int nx, int ny)//获取指定棋子各个方向的同色棋子个数最大值
 {
 	int color = GetChessBoardColor(nx, ny);
 	if (color == -1)
@@ -157,76 +157,4 @@ int GetWinner()//获取赢家，-1无,0白,1黑
 		}
 	}
 	return -1;
-}
-
-int GetResult(int nx, int ny)
-{
-	CPoint pt[2];
-	int u;
-	int color = GetChessBoardColor(nx, ny);
-	if (color == -1)
-		return -1;
-
-	int x = nx, y = ny;
-	int m_max, count;
-	int t[2];
-	while (--y >= 0 && GetChessBoardColor(x, y) == color);
-	y++;
-	pt[0].SetPoint(x, y);
-	for (count = 1; (++y < SIZE) && (GetChessBoardColor(x, y) == color); count++);
-	pt[1].SetPoint(x, y);
-	u = 1;
-	m_max = count;
-	x = nx, y = ny;
-
-	while (--x >= 0 && GetChessBoardColor(x, y) == color);
-	x++;
-	t[0] = x;
-	for (count = 1; ++x < SIZE && GetChessBoardColor(x, y) == color; count++);
-	if (m_max < count) 
-	{
-		m_max = count;
-		pt[0].SetPoint(t[0], y);
-		pt[1].SetPoint(x, y);
-		u = 0;
-	}
-	x = nx, y = ny;
-
-	while (x - 1 >= 0 && y - 1 >= 0 && GetChessBoardColor(x - 1, y - 1) == color)
-		x--, y--;
-	t[0] = x;
-	t[1] = y;
-	for (count = 1; x + 1 < SIZE && y + 1 < SIZE && GetChessBoardColor(x + 1, y + 1) == color; count++)
-		x++, y++; 
-	if (m_max < count)
-	{
-		m_max = count;
-		pt[0].SetPoint(t[0], t[1]);
-		pt[1].SetPoint(x, y);
-		u = 2;
-	}
-	x = nx, y = ny;
-
-	while (x - 1 >= 0 && y + 1 < SIZE && GetChessBoardColor(x - 1, y + 1) == color)
-		x--, y++;
-	t[0] = x;
-	t[1] = y;
-	for (count = 1; x + 1 < SIZE && y - 1 >= 0 && GetChessBoardColor(x + 1, y - 1) == color; count++)
-		x++, y--;
-	if (m_max < count)
-	{
-		m_max = count;
-		pt[0].SetPoint(t[0], t[1]);
-		pt[1].SetPoint(x, y);
-		u = 3;
-	}
-	x = nx, y = ny;
-
-	int result;
-	switch (u)
-	{
-	case 0:
-		
-		break;
-	}
 }
