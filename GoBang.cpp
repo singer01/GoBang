@@ -101,7 +101,7 @@ BOOL CGoBangApp::InitInstance()
 }
 int GetChessBoardColor(int nx, int ny)
 {
-	return ChessBoard[ny][nx];;
+	return ChessBoard[ny][nx];
 }
 int GetChessCount(int nx, int ny)//获取指定棋子各个方向的同色棋子个数最大值
 {
