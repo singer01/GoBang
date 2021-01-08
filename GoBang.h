@@ -9,7 +9,6 @@
 #endif
 
 #include "resource.h"		// 主符号
-#define SIZE 15
 
 // CGoBangApp:
 // 有关此类的实现，请参阅 GoBang.cpp
@@ -30,8 +29,3 @@ public:
 };
 
 extern CGoBangApp theApp;
-
-int GetChessBoardColor(int nx, int ny);
-int GetChessCount(int nx, int ny);
-int GetWinner();//获取赢家，-1无,0白,1黑
-extern int ChessBoard[SIZE][SIZE];//棋盘，-1为空，0为白，1为黑

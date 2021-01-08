@@ -69,13 +69,6 @@ BOOL CGoBangApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-	for (int i = 0; i < SIZE; i++)
-	{
-		for (int j = 0; j < SIZE; j++)
-		{
-			ChessBoard[i][j] = -1;
-		}
-	}//初始化棋盘
 	CGoBangDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
@@ -98,62 +91,4 @@ BOOL CGoBangApp::InitInstance()
 	// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
 	//  而不是启动应用程序的消息泵。
 	return FALSE;
-}
-int GetChessBoardColor(int nx, int ny)
-{
-	return ChessBoard[ny][nx];
-}
-int GetChessCount(int nx, int ny)//获取指定棋子各个方向的同色棋子个数最大值
-{
-	int color = GetChessBoardColor(nx, ny);
-	if (color == -1)
-		return -1;
-
-	int x = nx, y = ny;
-	int m_max, count;
-	while (--y >= 0 && GetChessBoardColor(x, y) == color);
-	y++;
-	for (count = 1; (++y < SIZE) && (GetChessBoardColor(x, y) == color); count++);
-	m_max = count;
-	//y轴
-	x = nx, y = ny;
-	while (--x >= 0 && GetChessBoardColor(x, y) == color);
-	x++;
-	for (count = 1; ++x < SIZE && GetChessBoardColor(x, y) == color; count++);
-	if (m_max < count)
-		m_max = count;
-	//x轴
-	x = nx, y = ny;
-	while (x - 1 >= 0 && y - 1 >= 0 && GetChessBoardColor(x - 1, y - 1) == color)
-		x--, y--;
-	for (count = 1; x + 1 < SIZE && y + 1 < SIZE && GetChessBoardColor(x + 1, y + 1) == color; count++)
-		x++, y++;
-	if (m_max < count)
-		m_max = count;
-	//左下到右上
-	x = nx, y = ny;
-	while (x - 1 >= 0 && y + 1 < SIZE && GetChessBoardColor(x - 1, y + 1) == color)
-		x--, y++;
-	for (count = 1; x + 1 < SIZE && y - 1 >= 0 && GetChessBoardColor(x + 1, y - 1) == color; count++)
-		x++, y--;
-	if (m_max < count)
-		m_max = count;
-	//左上到右下
-	return m_max;
-}
-int GetWinner()//获取赢家，-1无,0白,1黑
-{
-	for (int i = 0; i < SIZE; i++)
-	{
-		for (int j = 0; j < SIZE; j++)
-		{
-			int color = GetChessBoardColor(i, j);
-			if (color != -1)
-			{
-				if (GetChessCount(i, j) >= 5)
-					return color;
-			}
-		}
-	}
-	return -1;
 }

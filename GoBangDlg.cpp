@@ -11,7 +11,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-int ChessBoard[SIZE][SIZE];
 
 // CGoBangDlg 对话框
 
@@ -26,6 +25,13 @@ CGoBangDlg::CGoBangDlg(CWnd* pParent /*=nullptr*/)
 void CGoBangDlg::DoDataExchange(CDataExchange* pDX)
 {
 	IsPlaying = false;
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			ChessBoard[i][j] = -1;
+		}
+	}//初始化棋盘
 	CDialogEx::DoDataExchange(pDX);
 }
 
@@ -38,6 +44,7 @@ BEGIN_MESSAGE_MAP(CGoBangDlg, CDialogEx)
 	ON_WM_SETCURSOR()
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_ENDGAME, &CGoBangDlg::OnBnClickedEndgame)
+	ON_BN_CLICKED(IDC_REPENTANCE, &CGoBangDlg::OnBnClickedRepentance)
 END_MESSAGE_MAP()
 
 
@@ -139,7 +146,9 @@ void CGoBangDlg::OnBnClickedStart()
 	GetDlgItem(IDC_START)->SetWindowTextW(L"重玩");
 	IsPlaying = true;
 	NowColor = 1;//黑先
+	index = -1;
 	GetDlgItem(IDC_ENDGAME)->EnableWindow(TRUE);
+	GetDlgItem(IDC_REPENTANCE)->EnableWindow(FALSE);
 	CleanChessBoard();
 }
 
@@ -161,6 +170,11 @@ void CGoBangDlg::OnLButtonUp(UINT nFlags, CPoint point)
 		return;
 	SetChessBoardColor(x, y, NowColor);
 	NowColor = (!NowColor);
+	index++;
+	order[index].x = x;
+	order[index].y = y;
+	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > 0);
+	//如果可以悔棋，取消禁用“悔棋”按钮，否则禁用“悔棋”按钮
 	SendMessage(WM_SETCURSOR);
 	//放置棋子
 	int winner = GetWinner();
@@ -187,6 +201,11 @@ void CGoBangDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	//判断输赢
 }
 
+int CGoBangDlg::GetChessBoardColor(int nx, int ny)
+{
+	return ChessBoard[ny][nx];
+}
+
 void CGoBangDlg::SetChessBoardColor(int nx, int ny, int color)
 {
 	ChessBoard[ny][nx] = color;
@@ -207,14 +226,22 @@ void CGoBangDlg::SetChessBoardColor(int nx, int ny, int color)
 		dc->SelectObject(brush_b);
 		dc->Ellipse(o.x - 15, o.y - 15, o.x + 15, o.y + 15);
 	}
+	else//清除该坐标棋子，需要重绘,用于悔棋
+	{
+		RECT rect;
+		GetClientRect(&rect);
+		InvalidateRect(&rect);
+	}
 }
 
 void CGoBangDlg::EndGame()
 {
 	CleanChessBoard();
 	IsPlaying = false;
+	index = -1;
 	GetDlgItem(IDC_START)->SetWindowTextW(L"开始游戏");
 	GetDlgItem(IDC_ENDGAME)->EnableWindow(FALSE);
+	GetDlgItem(IDC_REPENTANCE)->EnableWindow(FALSE);
 }
 
 void CGoBangDlg::CleanChessBoard()
@@ -229,6 +256,63 @@ void CGoBangDlg::CleanChessBoard()
 	RECT rect;
 	GetClientRect(&rect);
 	InvalidateRect(&rect);
+}
+
+int CGoBangDlg::GetChessCount(int nx, int ny)
+{
+	int color = GetChessBoardColor(nx, ny);
+	if (color == -1)
+		return -1;
+
+	int x = nx, y = ny;
+	int m_max, count;
+	while (--y >= 0 && GetChessBoardColor(x, y) == color);
+	y++;
+	for (count = 1; (++y < SIZE) && (GetChessBoardColor(x, y) == color); count++);
+	m_max = count;
+	//y轴
+	x = nx, y = ny;
+	while (--x >= 0 && GetChessBoardColor(x, y) == color);
+	x++;
+	for (count = 1; ++x < SIZE && GetChessBoardColor(x, y) == color; count++);
+	if (m_max < count)
+		m_max = count;
+	//x轴
+	x = nx, y = ny;
+	while (x - 1 >= 0 && y - 1 >= 0 && GetChessBoardColor(x - 1, y - 1) == color)
+		x--, y--;
+	for (count = 1; x + 1 < SIZE && y + 1 < SIZE && GetChessBoardColor(x + 1, y + 1) == color; count++)
+		x++, y++;
+	if (m_max < count)
+		m_max = count;
+	//左下到右上
+	x = nx, y = ny;
+	while (x - 1 >= 0 && y + 1 < SIZE && GetChessBoardColor(x - 1, y + 1) == color)
+		x--, y++;
+	for (count = 1; x + 1 < SIZE && y - 1 >= 0 && GetChessBoardColor(x + 1, y - 1) == color; count++)
+		x++, y--;
+	if (m_max < count)
+		m_max = count;
+	//左上到右下
+	return m_max;
+}
+
+int CGoBangDlg::GetWinner()
+
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			int color = GetChessBoardColor(i, j);
+			if (color != -1)
+			{
+				if (GetChessCount(i, j) >= 5)
+					return color;
+			}
+		}
+	}
+	return -1;
 }
 
 
@@ -259,4 +343,13 @@ void CGoBangDlg::OnBnClickedEndgame()
 {
 	if (MessageBoxW(L"确定要结束本局吗？", L"双人五子棋", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		EndGame();
+}
+
+
+void CGoBangDlg::OnBnClickedRepentance()
+{
+	SetChessBoardColor(order[index].x, order[index].y, -1);//清除上一步棋
+	index--;
+	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > 0);
+	NowColor = (!NowColor);//改变棋子颜色
 }
