@@ -49,4 +49,6 @@ public:
 	afx_msg void OnClose();
 	afx_msg void OnBnClickedEndgame();
 	afx_msg void OnBnClickedRepentance();
+	afx_msg void OnBnClickedSave();
+	afx_msg void OnBnClickedOpen();
 };

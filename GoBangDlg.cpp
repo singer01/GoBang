@@ -8,6 +8,8 @@
 #include "GoBangDlg.h"
 #include "afxdialogex.h"
 #include"resource.h"
+#include <fstream>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -45,6 +47,8 @@ BEGIN_MESSAGE_MAP(CGoBangDlg, CDialogEx)
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_ENDGAME, &CGoBangDlg::OnBnClickedEndgame)
 	ON_BN_CLICKED(IDC_REPENTANCE, &CGoBangDlg::OnBnClickedRepentance)
+	ON_BN_CLICKED(IDC_SAVE, &CGoBangDlg::OnBnClickedSave)
+	ON_BN_CLICKED(IDC_OPEN, &CGoBangDlg::OnBnClickedOpen)
 END_MESSAGE_MAP()
 
 
@@ -88,10 +92,7 @@ void CGoBangDlg::OnPaint()
 		dc.DrawIcon(x, y, m_hIcon);
 	}
 	else
-	{
-		RECT rect;
-		GetClientRect(&rect);
-		InvalidateRect(&rect,FALSE);//清空窗口
+	{		
 		CPaintDC dc(this);
 		CPen pen(PS_SOLID, 2, RGB(0, 0, 0));
 		dc.SelectObject(pen);
@@ -149,6 +150,7 @@ void CGoBangDlg::OnBnClickedStart()
 	index = -1;
 	GetDlgItem(IDC_ENDGAME)->EnableWindow(TRUE);
 	GetDlgItem(IDC_REPENTANCE)->EnableWindow(FALSE);
+	GetDlgItem(IDC_SAVE)->EnableWindow(TRUE);
 	CleanChessBoard();
 }
 
@@ -173,7 +175,7 @@ void CGoBangDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	index++;
 	order[index].x = x;
 	order[index].y = y;
-	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > 0);
+	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > -1);
 	//如果可以悔棋，取消禁用“悔棋”按钮，否则禁用“悔棋”按钮
 	SendMessage(WM_SETCURSOR);
 	//放置棋子
@@ -190,11 +192,11 @@ void CGoBangDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	if (winner != -1||count == SIZE * SIZE)
 	{
 		if (winner == 0)
-			MessageBox(L"白棋胜利！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
+			MessageBoxW(L"白棋胜利！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
 		else if (winner == 1)
-			MessageBox(L"黑棋胜利！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
+			MessageBoxW(L"黑棋胜利！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
 		else
-			MessageBox(L"平局！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
+			MessageBoxW(L"平局！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
 		EndGame();
 		return;
 	}
@@ -228,9 +230,7 @@ void CGoBangDlg::SetChessBoardColor(int nx, int ny, int color)
 	}
 	else//清除该坐标棋子，需要重绘,用于悔棋
 	{
-		RECT rect;
-		GetClientRect(&rect);
-		InvalidateRect(&rect);
+		Invalidate();
 	}
 }
 
@@ -242,6 +242,7 @@ void CGoBangDlg::EndGame()
 	GetDlgItem(IDC_START)->SetWindowTextW(L"开始游戏");
 	GetDlgItem(IDC_ENDGAME)->EnableWindow(FALSE);
 	GetDlgItem(IDC_REPENTANCE)->EnableWindow(FALSE);
+	GetDlgItem(IDC_SAVE)->EnableWindow(FALSE);
 }
 
 void CGoBangDlg::CleanChessBoard()
@@ -253,9 +254,7 @@ void CGoBangDlg::CleanChessBoard()
 			ChessBoard[i][j] = -1;
 		}
 	}
-	RECT rect;
-	GetClientRect(&rect);
-	InvalidateRect(&rect);
+	Invalidate();
 }
 
 int CGoBangDlg::GetChessCount(int nx, int ny)
@@ -350,6 +349,94 @@ void CGoBangDlg::OnBnClickedRepentance()
 {
 	SetChessBoardColor(order[index].x, order[index].y, -1);//清除上一步棋
 	index--;
-	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > 0);
+	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > -1);
 	NowColor = (!NowColor);//改变棋子颜色
+}
+
+
+void CGoBangDlg::OnBnClickedSave()
+{
+	CFileDialog filedlg(FALSE);
+	filedlg.m_ofn.lpstrFilter = L"五子棋文件(*.gob)\0*.gob\0\0";
+	if (filedlg.DoModal() != IDOK)
+		return;
+	CString filename = filedlg.GetPathName();
+	if (filedlg.GetFileExt() == L"")
+		filename += ".gob";
+	std::ofstream outfile;
+	outfile.open(CStringA(filename));
+	if(!outfile)
+	{
+		MessageBoxW(L"保存失败！", L"双人五子棋", MB_OK | MB_ICONERROR);
+		return;
+	}
+	for (int y = 0; y < 15; y++)
+	{
+		for (int x = 0; x < 15; x++)
+		{
+			outfile << GetChessBoardColor(x, y) << '\0';
+		}
+		outfile << '\r';
+	}
+	outfile <<NowColor<<'\r'<< index << '\r';
+	for (int i = 0; i <= index; i++)
+		outfile << order[i].x << '\0' << order[i].y << '\r';
+	outfile.close();
+	MessageBoxW(L"保存成功！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
+}
+/*
+	五子棋文件格式：
+	1.扩展名：gob。
+	2.文件由多个数字组成，保存了程序运行时的所有变量。
+	3.第1到第SIZE*SIZE(225)个数字：记录棋盘上每个交叉点的状态。(ChessBoard)
+	4.第SIZE*SIZE+1(226)个数字：记录下一步是哪一方走。(NowColor)
+	5.第SIZE*SIZE+2(227)个数字：记录已经走了多少步棋，供悔棋功能用。(index)
+	6.第SIZE*SIZE+3(228)到第(SIZE*SIZE+3+第226个数字*2)个数字：
+	每两个数为一组，记录每一步棋的x坐标和y坐标。(order)
+*/
+
+void CGoBangDlg::OnBnClickedOpen()
+{
+	CFileDialog filedlg(TRUE);
+	filedlg.m_ofn.lpstrFilter = L"五子棋文件(*.gob)\0*.gob\0\0";
+	if (filedlg.DoModal() != IDOK)
+		return;
+
+	CString filename = filedlg.GetPathName();
+	if (filedlg.GetFileExt() == L"")
+		filename += ".gob";
+	std::ifstream infile;
+	infile.open(CStringA(filename));
+	if (!infile)
+	{
+		MessageBoxW(L"打开失败！", L"双人五子棋", MB_OK | MB_ICONERROR);
+		return;
+	}
+	for (int y = 0; y < 15; y++)
+	{
+		for (int x = 0; x < 15; x++)
+		{
+			int t;
+			infile >> t;
+			infile.seekg(infile.tellg().operator+(1));
+			ChessBoard[y][x] = t;
+		}
+	}
+	Invalidate();
+	infile >> NowColor;
+	infile.seekg(infile.tellg().operator+(1));
+	infile >> index;
+	for (int i = 0; i <= index; i++)
+	{
+		infile.seekg(infile.tellg().operator+(1));
+		infile >> order[i].x;
+		infile.seekg(infile.tellg().operator+(1));
+		infile>> order[i].y;
+	}
+	infile.close();
+	GetDlgItem(IDC_START)->SetWindowTextW(L"重玩");
+	IsPlaying = true;
+	GetDlgItem(IDC_ENDGAME)->EnableWindow(TRUE);
+	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > 0);
+	GetDlgItem(IDC_SAVE)->EnableWindow(TRUE);
 }
