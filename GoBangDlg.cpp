@@ -64,7 +64,7 @@ BOOL CGoBangDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-
+	SetBackgroundImage(IDB_BACKGROUNDIMAGE);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -166,8 +166,9 @@ void CGoBangDlg::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if (!IsPlaying || point.x < 40 || point.x>760 || point.y < 40 || point.y>760)
 		return;
-	int x = (round(point.x / 50.0) - 1);
-	int y = (round(point.y / 50.0) - 1);
+	int x = int(round(point.x / 50.0) - 1);
+	int y = int(round(point.y / 50.0) - 1);
+	//将鼠标坐标转为数组下标
 	if (GetChessBoardColor(x, y) != -1)//如果已有棋子
 		return;
 	SetChessBoardColor(x, y, NowColor);
@@ -178,7 +179,7 @@ void CGoBangDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > -1);
 	//如果可以悔棋，取消禁用“悔棋”按钮，否则禁用“悔棋”按钮
 	SendMessage(WM_SETCURSOR);
-	//放置棋子
+	//以上为放置棋子
 	int winner = GetWinner();
 	int count = 0;
 	for (int i = 0; i < SIZE; i++)
@@ -200,7 +201,7 @@ void CGoBangDlg::OnLButtonUp(UINT nFlags, CPoint point)
 		EndGame();
 		return;
 	}
-	//判断输赢
+	//判断胜负
 }
 
 int CGoBangDlg::GetChessBoardColor(int nx, int ny)
@@ -317,16 +318,15 @@ int CGoBangDlg::GetWinner()
 
 BOOL CGoBangDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	POINT point;
 	GetCursorPos(&point);
 	ScreenToClient(&point);
 	if (!IsPlaying || point.x < 40 || point.x>760 || point.y < 40 || point.y>760)
 		return CDialogEx::OnSetCursor(pWnd, nHitTest, message);
 	if (NowColor == 1)//黑棋
-		SetCursor(LoadCursorW(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDC_CURSOR1)));
+		SetCursor(LoadCursorW(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDC_BLACK)));
 	else
-		SetCursor(LoadCursorW(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDC_CURSOR2)));
+		SetCursor(LoadCursorW(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDC_WHITE)));
 	return TRUE;
 }
 
@@ -378,9 +378,11 @@ void CGoBangDlg::OnBnClickedSave()
 		}
 		outfile << '\r';
 	}
+	//输出ChessBoard数组
 	outfile <<NowColor<<'\r'<< index << '\r';
 	for (int i = 0; i <= index; i++)
 		outfile << order[i].x << '\0' << order[i].y << '\r';
+	//输出order数组
 	outfile.close();
 	MessageBoxW(L"保存成功！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
 }
@@ -420,9 +422,14 @@ void CGoBangDlg::OnBnClickedOpen()
 			infile >> t;
 			infile.seekg(infile.tellg().operator+(1));
 			ChessBoard[y][x] = t;
+			/*
+			因为保存文件已经用了GetChessBoardColor函数，
+			文件中的数字是正常顺序，不能使用SetChessBoardColor函数。
+			而且，SetChessBoardColor遇到-1就会刷新棋盘，性能不好。
+			*/
 		}
 	}
-	Invalidate();
+	Invalidate();//绘制棋盘和棋子
 	infile >> NowColor;
 	infile.seekg(infile.tellg().operator+(1));
 	infile >> index;
@@ -435,8 +442,8 @@ void CGoBangDlg::OnBnClickedOpen()
 	}
 	infile.close();
 	GetDlgItem(IDC_START)->SetWindowTextW(L"重玩");
-	IsPlaying = true;
 	GetDlgItem(IDC_ENDGAME)->EnableWindow(TRUE);
 	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > 0);
 	GetDlgItem(IDC_SAVE)->EnableWindow(TRUE);
+	IsPlaying = true;
 }

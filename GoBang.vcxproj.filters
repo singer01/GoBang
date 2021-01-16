@@ -65,5 +65,14 @@
     <Image Include="res\GoBang.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\bitmap1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="C:\Users\LENOVO\Desktop\2d2ab8dd53f0202d85c6539c0d6cd809.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="C:\Users\LENOVO\Desktop\背景图.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

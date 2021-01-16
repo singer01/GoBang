@@ -4,8 +4,9 @@
 //
 #define IDD_GOBANG_DIALOG               102
 #define IDR_MAINFRAME                   128
-#define IDC_CURSOR1                     130
-#define IDC_CURSOR2                     131
+#define IDC_BLACK                     130
+#define IDC_WHITE                     131
+#define IDB_BACKGROUNDIMAGE             138
 #define IDC_START                       1001
 #define IDC_QUIT                        1002
 #define IDC_ENDGAME                     1003
@@ -17,7 +18,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        135
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1006
 #define _APS_NEXT_SYMED_VALUE           101

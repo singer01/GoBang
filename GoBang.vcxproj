@@ -192,7 +192,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GoBang.cpp" />
-    <ClCompile Include="GoBangDlg.cpp" />
+    <ClCompile Include="GoBangDlg.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -209,6 +211,9 @@
     <None Include="res\GoBang.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="C:\Users\LENOVO\Desktop\2d2ab8dd53f0202d85c6539c0d6cd809.bmp" />
+    <Image Include="C:\Users\LENOVO\Desktop\背景图.bmp" />
+    <Image Include="res\bitmap1.bmp" />
     <Image Include="res\GoBang.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
