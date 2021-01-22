@@ -206,15 +206,18 @@
     <ResourceCompile Include="GoBang.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\black.cur" />
     <None Include="res\cursor1.cur" />
     <None Include="res\cursor2.cur" />
     <None Include="res\GoBang.rc2" />
+    <None Include="res\white.cur" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="C:\Users\LENOVO\Desktop\2d2ab8dd53f0202d85c6539c0d6cd809.bmp" />
     <Image Include="C:\Users\LENOVO\Desktop\背景图.bmp" />
     <Image Include="res\bitmap1.bmp" />
     <Image Include="res\GoBang.ico" />
+    <Image Include="res\背景图.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

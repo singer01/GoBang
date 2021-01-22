@@ -60,6 +60,12 @@
     <None Include="res\cursor2.cur">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="res\black.cur">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\white.cur">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\GoBang.ico">
@@ -72,6 +78,9 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="C:\Users\LENOVO\Desktop\背景图.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\背景图.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

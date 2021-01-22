@@ -29,6 +29,7 @@ protected:
 	void SetChessBoardColor(int ,int,int);
 	void EndGame();
 	void CleanChessBoard();
+	void OpenFile(CString filename);
 	int GetChessCount(int,int);
 	int GetWinner();//获取赢家，-1无,0白,1黑
 

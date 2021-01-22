@@ -65,6 +65,11 @@ BOOL CGoBangDlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 	SetBackgroundImage(IDB_BACKGROUNDIMAGE);
+	CString filename = AfxGetApp()->m_lpCmdLine;
+	if (filename == L"")
+		return TRUE;
+	filename.Remove('\"');
+	OpenFile(filename);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -258,6 +263,49 @@ void CGoBangDlg::CleanChessBoard()
 	Invalidate();
 }
 
+void CGoBangDlg::OpenFile(CString filename)
+{
+	std::ifstream infile;
+	infile.open(CStringA(filename));
+	if (!infile)
+	{
+		MessageBoxW(L"打开失败！", L"双人五子棋", MB_OK | MB_ICONERROR);
+		return;
+	}
+	for (int y = 0; y < 15; y++)
+	{
+		for (int x = 0; x < 15; x++)
+		{
+			int t;
+			infile >> t;
+			infile.seekg(infile.tellg().operator+(1));
+			ChessBoard[y][x] = t;
+			/*
+			因为保存文件已经用了GetChessBoardColor函数，
+			文件中的数字是正常顺序，不能使用SetChessBoardColor函数。
+			而且，SetChessBoardColor遇到-1就会刷新棋盘，性能不好。
+			*/
+		}
+	}
+	Invalidate();//绘制棋盘和棋子
+	infile >> NowColor;
+	infile.seekg(infile.tellg().operator+(1));
+	infile >> index;
+	for (int i = 0; i <= index; i++)
+	{
+		infile.seekg(infile.tellg().operator+(1));
+		infile >> order[i].x;
+		infile.seekg(infile.tellg().operator+(1));
+		infile >> order[i].y;
+	}
+	infile.close();
+	GetDlgItem(IDC_START)->SetWindowTextW(L"重玩");
+	GetDlgItem(IDC_ENDGAME)->EnableWindow(TRUE);
+	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > 0);
+	GetDlgItem(IDC_SAVE)->EnableWindow(TRUE);
+	IsPlaying = true;
+}
+
 int CGoBangDlg::GetChessCount(int nx, int ny)
 {
 	int color = GetChessBoardColor(nx, ny);
@@ -403,47 +451,10 @@ void CGoBangDlg::OnBnClickedOpen()
 	filedlg.m_ofn.lpstrFilter = L"五子棋文件(*.gob)\0*.gob\0\0";
 	if (filedlg.DoModal() != IDOK)
 		return;
-
 	CString filename = filedlg.GetPathName();
 	if (filedlg.GetFileExt() == L"")
 		filename += ".gob";
-	std::ifstream infile;
-	infile.open(CStringA(filename));
-	if (!infile)
-	{
-		MessageBoxW(L"打开失败！", L"双人五子棋", MB_OK | MB_ICONERROR);
+	if (IsPlaying && MessageBoxW(L"正在游戏中，本局将被结束。确定要打开棋局吗？", L"双人五子棋", MB_YESNO | MB_ICONQUESTION) == IDNO)
 		return;
-	}
-	for (int y = 0; y < 15; y++)
-	{
-		for (int x = 0; x < 15; x++)
-		{
-			int t;
-			infile >> t;
-			infile.seekg(infile.tellg().operator+(1));
-			ChessBoard[y][x] = t;
-			/*
-			因为保存文件已经用了GetChessBoardColor函数，
-			文件中的数字是正常顺序，不能使用SetChessBoardColor函数。
-			而且，SetChessBoardColor遇到-1就会刷新棋盘，性能不好。
-			*/
-		}
-	}
-	Invalidate();//绘制棋盘和棋子
-	infile >> NowColor;
-	infile.seekg(infile.tellg().operator+(1));
-	infile >> index;
-	for (int i = 0; i <= index; i++)
-	{
-		infile.seekg(infile.tellg().operator+(1));
-		infile >> order[i].x;
-		infile.seekg(infile.tellg().operator+(1));
-		infile>> order[i].y;
-	}
-	infile.close();
-	GetDlgItem(IDC_START)->SetWindowTextW(L"重玩");
-	GetDlgItem(IDC_ENDGAME)->EnableWindow(TRUE);
-	GetDlgItem(IDC_REPENTANCE)->EnableWindow(index > 0);
-	GetDlgItem(IDC_SAVE)->EnableWindow(TRUE);
-	IsPlaying = true;
+	OpenFile(filename);
 }
