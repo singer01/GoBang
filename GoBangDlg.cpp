@@ -186,16 +186,7 @@ void CGoBangDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	SendMessage(WM_SETCURSOR);
 	//以上为放置棋子
 	int winner = GetWinner();
-	int count = 0;
-	for (int i = 0; i < SIZE; i++)
-	{
-		for (int j = 0; j < SIZE; j++)
-		{
-			if (ChessBoard[i][j] != -1)
-				count++;
-		}
-	}
-	if (winner != -1||count == SIZE * SIZE)
+	if (winner != -1 || index == (SIZE * SIZE - 1))
 	{
 		if (winner == 0)
 			MessageBoxW(L"白棋胜利！", L"双人五子棋", MB_OK | MB_ICONINFORMATION);
