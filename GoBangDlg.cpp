@@ -69,7 +69,8 @@ BOOL CGoBangDlg::OnInitDialog()
 	if (filename == L"")
 		return TRUE;
 	filename.Remove('\"');
-	OpenFile(filename);
+	if (filename.Mid(filename.ReverseFind('.')) == ".gob")
+		OpenFile(filename);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
